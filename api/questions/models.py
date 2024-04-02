@@ -45,7 +45,7 @@ class Question(models.Model):
     quality_of_answer = models.PositiveIntegerField(choices=QUALITY_OPTIONS)
     score = models.FloatField()
 
-    date = models.DateTimeField(auto_add_now=True)
+    date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if any([
