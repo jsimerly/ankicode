@@ -8,8 +8,9 @@ class Category(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     n_questions = models.PositiveIntegerField()
     n_attempts = models.PositiveIntegerField()
+    current_score = models.PositiveIntegerField(default=0)
 
-    def get_current_score(self) -> float:
+    def update_current_score(self) -> float:
         all_questions = self.question_set.all()
         if len(all_questions) == 0:
             return 0
@@ -20,7 +21,8 @@ class Category(models.Model):
 
         for question in all_questions:
             ema = question.score + ema( * (1-K))
-        return ema
+        self.current_score = ema
+        self.save()
 
 class Question(models.Model):
     DIFFICULTY_OPTIONS = (
@@ -57,11 +59,19 @@ class Question(models.Model):
         ]):
             difficulty_map = {
                 'E' : 100,
-                'M': 300,
-                'H': 1000,
+                'M': 200,
+                'H': 300,
+            }
+            score_map = {
+                0: 0,
+                1: .3,
+                2: .6,
+                3: 2,
+                4: 2.5,
+                5: 4
             }
 
-            self.score = difficulty_map[self.difficulty] * self.quality_of_answer
+            self.score = difficulty_map[self.difficulty] * score_map[self.quality_of_answer]
             super(Question, self).save(*args, **kwargs)
 
 
